@@ -29,13 +29,14 @@ exports.getCard = (req, response) => {
 }
 
 //creates a new card
-//TODO add a check to confirm unique cards
 exports.newCard = (req, response) => {
     let cardData = {
         name: req.body.name,
         imageURL: req.body.image,
+        backgroundCol: '#000',
         jobtitle: req.body.jobtitle,
         phonenumber: req.body.phonenumber,
+        email: req.body.email,
         site: req.body.site,
         businessname: req.body.businessname,
         urlname: req.body.urlname,
@@ -61,7 +62,6 @@ exports.newCard = (req, response) => {
             })
             .catch(err => {
                 response.status(500).json({ error: 'something went wrong'});
-                console.log(err);
             })
         }
     })
@@ -138,10 +138,11 @@ exports.imageUpload = (req, response) => {
         })
         .then(() => {
             const imageURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
-            return db.doc(`/cards/${req.urlname}`).update({ imageURL });
+            return db.doc(`/cards/${req.params.urlname}`).update({ imageURL });
         })
         .then(() => {
-            return response.json({ message: 'image uploaded successfully'})
+            const imageURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
+            return response.json({ message: 'image uploaded successfully', image: imageURL})
         })
         .catch(err => {
             console.error(err);
