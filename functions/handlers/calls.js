@@ -13,7 +13,8 @@ exports.getCard = (req, response) => {
     let cardData = {}
 
     //the actual request to the firestore
-    db.doc(`/cards/${req.params.urlname}`).get()
+    //convert to lowercase to ensure that the correct one is obtained
+    db.doc(`/cards/${req.params.urlname.toLowerCase()}`).get()
         .then((doc) => {
             //if the doc exists, then return the data from it
             if(doc.exists){
@@ -43,7 +44,8 @@ exports.newCard = (req, response) => {
         email: req.body.email,
         site: req.body.site,
         businessname: req.body.businessname,
-        urlname: req.body.urlname,
+        //convert the url to lowercase, prevent people using capitalisation to spoof names etc
+        urlname: req.body.urlname.toLowerCase(),
     }
 
     //a check for duplicates before creating or overwriting
