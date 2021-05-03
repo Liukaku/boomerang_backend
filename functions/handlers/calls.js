@@ -15,12 +15,14 @@ exports.getCard = (req, response) => {
     //the actual request to the firestore
     db.doc(`/cards/${req.params.urlname}`).get()
         .then((doc) => {
+            //if the doc exists, then return the data from it
             if(doc.exists){
                 cardData = doc
                 return  response.json(doc.data())
             }
+            //if the doc doesn't exist, return an error message
             else {
-                return response.status(404).json({ error: 'this business card does not exist' })
+                return response.json({ error: 'this business card does not exist' })
             }
         })
         .catch((err) => {
@@ -30,10 +32,12 @@ exports.getCard = (req, response) => {
 
 //creates a new card
 exports.newCard = (req, response) => {
+
+    //create a variable for the data
     let cardData = {
         name: req.body.name,
-        imageURL: req.body.image,
-        backgroundCol: '#000',
+        imageURL: false,
+        backgroundCol: '#121212',
         jobtitle: req.body.jobtitle,
         phonenumber: req.body.phonenumber,
         email: req.body.email,
@@ -42,7 +46,7 @@ exports.newCard = (req, response) => {
         urlname: req.body.urlname,
     }
 
-//a check for duplicates before creating or overwriting
+    //a check for duplicates before creating or overwriting
     db.doc(`/cards/${cardData.urlname}`).get()
     .then((doc) => {
         if(doc.exists){
@@ -52,6 +56,7 @@ exports.newCard = (req, response) => {
 
         //if not then go ahead and try to create the doc
         else{
+            //uses .set to give the DB doc a name for easy URL handling
             admin.firestore()
             .collection('cards').doc(cardData.urlname)
             .set(cardData)
@@ -69,15 +74,15 @@ exports.newCard = (req, response) => {
             response.status(500).json({ error: 'something went wrong'});
             console.log(err);
         })
+        //returns a duplicate error
     .catch((err) => {
         return response.json({duplicate: 'that card already exists'})
     })
 
 }
 
+//this is just for debugging to check to see if a card exists
 exports.checkCards = (req, response) => {
-    // let beep = req.params.urlname
-    // db.collection('cards').where('urlname', '==', req.params.urlname).get()
     db.doc(`/cards/${req.params.urlname}`).get()
     .then((doc) => {
         if(doc.exists){
@@ -91,6 +96,17 @@ exports.checkCards = (req, response) => {
         response.status(500).json({ error: 'something went wrong'});
         console.log(err);
     })
+}
+
+
+//handling the colour changing
+exports.changeCol = (req, response) => {
+    //sets the new background colour
+    db.doc(`/cards/${req.params.urlname}`).update({ 'backgroundCol' : req.body.backCol });
+    //removes the background image and sets it to false
+    db.doc(`/cards/${req.params.urlname}`).update({ 'imageURL' : false });
+    //returns a confirmation message and the colour for client side updates
+    response.status(200).json({ success: "background image removed, colour updated", colour: req.body.backCol})
 }
 
 //busboy is an npm package for handling uploads
@@ -127,6 +143,7 @@ exports.imageUpload = (req, response) => {
         file.pipe(fs.createWriteStream(filePath));
     });
     
+    //finally uploads the image
     busboy.on('finish', () => {
         admin.storage().bucket().upload(imageToBeUploaded.filePath, {
             resumable: false,
@@ -136,11 +153,13 @@ exports.imageUpload = (req, response) => {
                 }
             }
         })
+        //updates the card image URL to that of the newly uploaded image
         .then(() => {
             const imageURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
             return db.doc(`/cards/${req.params.urlname}`).update({ imageURL });
         })
         .then(() => {
+            //returning the image URL lets you update the front end quickly without then having to make call for the new data
             const imageURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
             return response.json({ message: 'image uploaded successfully', image: imageURL})
         })
