@@ -158,6 +158,7 @@ exports.imageUpload = (req, response) => {
         //updates the card image URL to that of the newly uploaded image
         .then(() => {
             const imageURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
+            //convert the request URL to lowercase for searching the DB
             return db.doc(`/cards/${req.params.urlname.toLowerCase()}`).update({ imageURL });
         })
         .then(() => {
