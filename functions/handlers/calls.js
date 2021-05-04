@@ -104,9 +104,9 @@ exports.checkCards = (req, response) => {
 //handling the colour changing
 exports.changeCol = (req, response) => {
     //sets the new background colour
-    db.doc(`/cards/${req.params.urlname}`).update({ 'backgroundCol' : req.body.backCol });
+    db.doc(`/cards/${req.params.urlname.toLowerCase()}`).update({ 'backgroundCol' : req.body.backCol });
     //removes the background image and sets it to false
-    db.doc(`/cards/${req.params.urlname}`).update({ 'imageURL' : false });
+    db.doc(`/cards/${req.params.urlname.toLowerCase()}`).update({ 'imageURL' : false });
     //returns a confirmation message and the colour for client side updates
     response.status(200).json({ success: "background image removed, colour updated", colour: req.body.backCol})
 }
@@ -158,7 +158,7 @@ exports.imageUpload = (req, response) => {
         //updates the card image URL to that of the newly uploaded image
         .then(() => {
             const imageURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
-            return db.doc(`/cards/${req.params.urlname}`).update({ imageURL });
+            return db.doc(`/cards/${req.params.urlname.toLowerCase()}`).update({ imageURL });
         })
         .then(() => {
             //returning the image URL lets you update the front end quickly without then having to make call for the new data
@@ -166,7 +166,7 @@ exports.imageUpload = (req, response) => {
             return response.json({ message: 'image uploaded successfully', image: imageURL})
         })
         .catch(err => {
-            console.error(err);
+            console.error(imageToBeUploaded.mimetype);
             return response.status(500).json({error: err.code});
         });
     });
