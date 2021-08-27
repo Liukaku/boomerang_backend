@@ -1,5 +1,5 @@
 steps:
-- name: 'https://source.cloud.google.com/anything-69420/github_liukaku_boomerang_backend/+/main:functions/'
+- name: 'gcr.io/cloud-builders/nodejs'
   args:
   - gcloud
   - functions
