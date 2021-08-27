@@ -1,5 +1,5 @@
 steps:
-- name: 'gcr.io/cloud-builders/nodejs'
+- name: 'gcr.io/cloud-builders/nodejs/yarn'
   args:
   - gcloud
   - functions
