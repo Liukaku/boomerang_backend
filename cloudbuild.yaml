@@ -1,0 +1,10 @@
+steps:
+- name: 'https://source.cloud.google.com/anything-69420/github_liukaku_boomerang_backend/+/main:functions/'
+  args:
+  - gcloud
+  - functions
+  - deploy
+  - api
+  - --region=europe-west2
+  - --source=/functions/.
+  - --trigger-http
